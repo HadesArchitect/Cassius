@@ -1,0 +1,120 @@
+---
+persistence:
+  enabled: true
+  size: "1Ti"
+
+controller:
+  adminUser: admin
+  adminPassword: <ADMIN_PASSWORD>
+  image: <JENKINS_MASTER>
+  tag: <TAG>
+  podSecurityContextOverride:
+    runAsUser: 1000
+    runAsNonRoot: true
+    supplementalGroups: [ 1000 ]
+    fsGroupChangePolicy: "OnRootMismatch"
+  resources:
+    requests:
+      cpu: 4
+      memory: 8Gi
+    limits:
+      cpu: 8
+      memory: 16Gi
+
+  initializeOnce: false
+  installPlugins: false
+  overwritePlugins: true
+  overwritePluginsFromImage: true
+
+  JCasC:
+      security: |-
+        security:
+          gitHostKeyVerificationConfiguration:
+            sshHostKeyVerificationStrategy:
+              manuallyProvidedKeyVerificationStrategy:
+                approvedHostKeys: |-
+                  github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+          # key gathered 2023-03-23
+          # See https://github.blog/2023-03-23-we-updated-our-rsa-ssh-host-key/
+
+      disabled-ui: |-
+        jenkins:
+          disabledAdministrativeMonitors:
+            - hudson.model.UpdateCenter$CoreUpdateMonitor
+
+
+agent:
+  connectTimeout: 200
+  containerCap: 64 #Number of agents/workers of same type that can run concurrently
+  # command and args have to be jnlp default in order to start agent
+  podTemplates:
+    - name: agent-dind
+      label: agent-dind
+      activeDeadlineSeconds: '0'
+      idleMinutes: '1'
+      instanceCap: '30'
+      nodeUsageMode: EXCLUSIVE
+      showRawYaml: 'true'
+      slaveConnectTimeout: '30'
+      yamlMergeStrategy: override
+      containers:
+        - alwaysPullImage: true
+          envVars:
+            - envVar:
+                key: DOCKER_TLS_CERTDIR
+                value: /certs/client/
+            - envVar:
+                key: DOCKER_CERT_PATH
+                value: /certs/client/
+            - envVar:
+                key: DOCKER_TLS_VERIFY
+                value: 'true'
+            - envVar:
+                key: DOCKER_HOST
+                value: tcp://localhost:2376
+          image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
+          livenessProbe:
+            failureThreshold: '0'
+            initialDelaySeconds: '0'
+            periodSeconds: '0'
+            successThreshold: '0'
+            timeoutSeconds: '0'
+          name: jnlp
+          privileged: 'false'
+          resourceLimitCpu: '2'
+          resourceLimitMemory: 4Gi
+          resourceRequestCpu: '1'
+          resourceRequestMemory: 2Gi
+          ttyEnabled: 'false'
+          workingDir: /home/jenkins/agent
+        - alwaysPullImage: 'false'
+          envVars:
+          - envVar:
+              key: DOCKER_TLS_CERTDIR
+              value: /certs
+          image: docker:dind
+          args: "--default-address-pool base=192.168.96.0/20,size=24"  # overwrite docker subnet in case of overlapping 
+          livenessProbe:
+            failureThreshold: '0'
+            initialDelaySeconds: '0'
+            periodSeconds: '0'
+            successThreshold: '0'
+            timeoutSeconds: '0'
+          name: dind
+          privileged: 'true'
+          resourceLimitCpu: '2'
+          resourceLimitMemory: 10Gi
+          resourceRequestCpu: '1'
+          resourceRequestMemory: 8Gi
+          ttyEnabled: 'false'
+          workingDir: /home/jenkins/agent
+      volumes:
+        - emptyDirVolume:
+            memory: 'false'
+            mountPath: /var/lib/docker
+        - emptyDirVolume:
+            memory: 'false'
+            mountPath: /certs
+      workspaceVolume:
+        emptyDirWorkspaceVolume:
+          memory: 'false'

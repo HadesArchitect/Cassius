@@ -1,0 +1,49 @@
+controller:
+  customJenkinsLabels:
+    - master
+  installPlugins:
+    - job-dsl:1.87
+    - configuration-as-code:1763.vb_fe9c1b_83f7b
+    - kubernetes:4174.v4230d0ccd951
+    - startup-trigger-plugin:2.9.4
+    - git
+    - workflow-job:1385.vb_58b_86ea_fff1
+    - workflow-cps
+  agent:
+    enabled: true
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: Welcome to Cassius!
+      test-job: |
+        jobs:
+          - script: >
+              pipelineJob('default-agent') {
+                triggers {
+                  hudsonStartupTrigger {
+                    nodeParameterName("master")
+                    label("master")
+                    quietPeriod("0")
+                    runOnChoice("False")
+                  }
+                }
+                definition {
+                  cps {
+                    script("node { sh 'echo hello world; docker run hello-world;' }")
+                  }
+                }
+              }
+    securityRealm: |-
+      local:
+        allowsSignup: false
+        enableCaptcha: false
+        users:
+        - id: "admin"
+          name: "Jenkins Admin"
+          password: "admin"
+#          password: "${chart-admin-password}"
+    authorizationStrategy: |-
+      loggedInUsersCanDoAnything:
+        allowAnonymousRead: false
