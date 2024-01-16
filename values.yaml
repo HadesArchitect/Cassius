@@ -1,3 +1,4 @@
+# Approve: node { sh 'echo hello world; docker run hello-world;' }
 controller:
   customJenkinsLabels:
     - master
@@ -9,14 +10,101 @@ controller:
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
-  agent:
-    enabled: true
   JCasC:
     defaultConfig: true
     configScripts:
       welcome-message: |
         jenkins:
           systemMessage: Welcome to Cassius!
+      dind: | 
+        jenkins:
+          clouds:
+          - kubernetes:
+              containerCap: 10
+              containerCapStr: "10"
+              jenkinsTunnel: "cassius-jenkins-agent.default.svc.cluster.local:50000"
+              jenkinsUrl: "http://cassius-jenkins.default.svc.cluster.local:8080"
+              name: "kubernetes"
+              namespace: "default"
+              podLabels:
+              - key: "jenkins/cassius-jenkins-agent"
+                value: "true"
+              serverUrl: "https://kubernetes.default"
+              templates:
+              - name: agent-dind
+                label: agent-dind
+                activeDeadlineSeconds: '0'
+                idleMinutes: '1'
+                instanceCap: '30'
+                nodeUsageMode: EXCLUSIVE
+                showRawYaml: 'true'
+                slaveConnectTimeout: '30'
+                yamlMergeStrategy: override
+                containers:
+                  - alwaysPullImage: true
+                    envVars:
+                      - envVar:
+                          key: DOCKER_TLS_CERTDIR
+                          value: /certs/client/
+                      - envVar:
+                          key: DOCKER_CERT_PATH
+                          value: /certs/client/
+                      - envVar:
+                          key: DOCKER_TLS_VERIFY
+                          value: 'true'
+                      - envVar:
+                          key: DOCKER_HOST
+                          value: tcp://localhost:2376
+                    # image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
+                    image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64
+                    livenessProbe:
+                      failureThreshold: '0'
+                      initialDelaySeconds: '0'
+                      periodSeconds: '0'
+                      successThreshold: '0'
+                      timeoutSeconds: '0'
+                    name: jnlp
+                    privileged: 'false'
+                    resourceLimitCpu: '1'
+                    resourceLimitMemory: 2Gi
+                    resourceRequestCpu: '1'
+                    resourceRequestMemory: 2Gi
+                    ttyEnabled: 'false'
+                    workingDir: /home/jenkins/agent
+                  - alwaysPullImage: 'false'
+                    envVars:
+                    - envVar:
+                        key: DOCKER_TLS_CERTDIR
+                        value: /certs
+                    - envVar:
+                        key: "DOCKER_IPTABLES_LEGACY"
+                        value: "1"
+                    image: docker:dind
+                    args: "--default-address-pool base=192.168.96.0/20,size=24"  # overwrite docker subnet in case of overlapping 
+                    livenessProbe:
+                      failureThreshold: '0'
+                      initialDelaySeconds: '0'
+                      periodSeconds: '0'
+                      successThreshold: '0'
+                      timeoutSeconds: '0'
+                    name: dind
+                    privileged: 'true'
+                    resourceLimitCpu: '1'
+                    resourceLimitMemory: 2Gi
+                    resourceRequestCpu: '1'
+                    resourceRequestMemory: 2Gi
+                    ttyEnabled: 'false'
+                    workingDir: /home/jenkins/agent
+                volumes:
+                  - emptyDirVolume:
+                      memory: 'false'
+                      mountPath: /var/lib/docker
+                  - emptyDirVolume:
+                      memory: 'false'
+                      mountPath: /certs
+                workspaceVolume:
+                  emptyDirWorkspaceVolume:
+                    memory: 'false'
       test-job: |
         jobs:
           - script: >
@@ -24,7 +112,7 @@ controller:
                 triggers {
                   hudsonStartupTrigger {
                     nodeParameterName("master")
-                    label("master")
+                    label("agent-dind")
                     quietPeriod("0")
                     runOnChoice("False")
                   }
@@ -47,3 +135,110 @@ controller:
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
+  # agent:
+  #   connectTimeout: 200
+  #   containerCap: 64 #Number of agents/workers of same type that can run concurrently
+  #   podTemplates:
+  #     dind: |
+  #       - name: agent-dind
+  #         label: agent-dind
+  #     default: |
+  #       - activeDeadlineSeconds: '0'
+  #         containers:
+  #           - alwaysPullImage: 'false'
+  #             envVars:
+  #             - envVar:
+  #                 key: JENKINS_URL
+  #                 value: http://jenkins:8080
+  #             image: "jenkins/inbound-agent:3192.v713e3b_039fb_e-5"
+  #             name: jnlp
+  #             privileged: 'false'
+  #             resourceLimitCpu: '4'
+  #             resourceLimitMemory: 10Gi
+  #             resourceRequestCpu: 500m
+  #             resourceRequestMemory: 1024Mi
+  #             ttyEnabled: 'false'
+  #             workingDir: /home/jenkins/agent
+  #         idleMinutes: '0'
+  #         instanceCap: '10'
+  #         label: default-agent
+  #         name: default
+  #         workspaceVolume:
+  #           emptyDirWorkspaceVolume:
+  #             memory: 'false'
+  #         yamlMergeStrategy: override
+  # agent:
+  #   connectTimeout: 200
+  #   containerCap: 64 #Number of agents/workers of same type that can run concurrently
+  #   # command and args have to be jnlp default in order to start agent
+  #   podTemplates:
+  #     - name: agent-dind
+  #       label: agent-dind
+  #       activeDeadlineSeconds: '0'
+  #       idleMinutes: '1'
+  #       instanceCap: '30'
+  #       nodeUsageMode: EXCLUSIVE
+  #       showRawYaml: 'true'
+  #       slaveConnectTimeout: '30'
+  #       yamlMergeStrategy: override
+  #       containers:
+  #         - alwaysPullImage: true
+  #           envVars:
+  #             - envVar:
+  #                 key: DOCKER_TLS_CERTDIR
+  #                 value: /certs/client/
+  #             - envVar:
+  #                 key: DOCKER_CERT_PATH
+  #                 value: /certs/client/
+  #             - envVar:
+  #                 key: DOCKER_TLS_VERIFY
+  #                 value: 'true'
+  #             - envVar:
+  #                 key: DOCKER_HOST
+  #                 value: tcp://localhost:2376
+  #           image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
+  #           livenessProbe:
+  #             failureThreshold: '0'
+  #             initialDelaySeconds: '0'
+  #             periodSeconds: '0'
+  #             successThreshold: '0'
+  #             timeoutSeconds: '0'
+  #           name: jnlp
+  #           privileged: 'false'
+  #           resourceLimitCpu: '2'
+  #           resourceLimitMemory: 4Gi
+  #           resourceRequestCpu: '1'
+  #           resourceRequestMemory: 2Gi
+  #           ttyEnabled: 'false'
+  #           workingDir: /home/jenkins/agent
+  #         - alwaysPullImage: 'false'
+  #           envVars:
+  #           - envVar:
+  #               key: DOCKER_TLS_CERTDIR
+  #               value: /certs
+  #           image: docker:dind
+  #           args: "--default-address-pool base=192.168.96.0/20,size=24"  # overwrite docker subnet in case of overlapping 
+  #           livenessProbe:
+  #             failureThreshold: '0'
+  #             initialDelaySeconds: '0'
+  #             periodSeconds: '0'
+  #             successThreshold: '0'
+  #             timeoutSeconds: '0'
+  #           name: dind
+  #           privileged: 'true'
+  #           resourceLimitCpu: '2'
+  #           resourceLimitMemory: 10Gi
+  #           resourceRequestCpu: '1'
+  #           resourceRequestMemory: 8Gi
+  #           ttyEnabled: 'false'
+  #           workingDir: /home/jenkins/agent
+  #       volumes:
+  #         - emptyDirVolume:
+  #             memory: 'false'
+  #             mountPath: /var/lib/docker
+  #         - emptyDirVolume:
+  #             memory: 'false'
+  #             mountPath: /certs
+  #       workspaceVolume:
+  #         emptyDirWorkspaceVolume:
+  #           memory: 'false'
