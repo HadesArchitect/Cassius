@@ -1,4 +1,3 @@
-# Approve: node { sh 'echo hello world; docker run hello-world;' }
 controller:
   customJenkinsLabels:
     - controller
@@ -10,6 +9,8 @@ controller:
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
+  scriptApproval:
+    - "node { sh 'echo hello world; docker run hello-world;' }"
   JCasC:
     defaultConfig: true
     configScripts:
