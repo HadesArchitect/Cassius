@@ -37,7 +37,7 @@ controller:
                 activeDeadlineSeconds: '0'
                 idleMinutes: '1'
                 instanceCap: '30'
-                nodeUsageMode: EXCLUSIVE
+                nodeUsageMode: "NORMAL"
                 showRawYaml: 'true'
                 slaveConnectTimeout: '30'
                 yamlMergeStrategy: override
