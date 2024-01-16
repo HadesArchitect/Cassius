@@ -9,14 +9,17 @@ controller:
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
-  scriptApproval:
-    - "node { sh 'echo hello world; docker run hello-world;' }"
   JCasC:
     defaultConfig: true
     configScripts:
       welcome-message: |
         jenkins:
           systemMessage: Welcome to Cassius!
+      approve-test-script: |
+        security:
+          scriptApproval:
+            approvedScriptHashes:
+            - "SHA512:55f29722dd817bfc598511c670782828e34fc6d0261f5c018287b96b43fc8f55b2ad5861bb022060b6f3f96c2dba417346c9023fcb431f5e3fba80b62a5844bf"
       dind: | 
         jenkins:
           clouds:
