@@ -37,22 +37,10 @@
   <builders>
     <hudson.tasks.Shell>
       <command>.build/docker/_docker_run.sh bullseye-build.docker build-jars.sh 11
-.build/docker/run-tests.sh fqltool-test 1</command>
+.build/docker/run-tests.sh cqlsh-test 1</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
-  <publishers>
-    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1256.v002534a_5f33e">
-      <testResults>build/test/**/TEST-*.xml</testResults>
-      <keepLongStdio>false</keepLongStdio>
-      <keepProperties>false</keepProperties>
-      <healthScaleFactor>1.0</healthScaleFactor>
-      <allowEmptyResults>false</allowEmptyResults>
-      <skipPublishingChecks>false</skipPublishingChecks>
-      <checksName></checksName>
-      <skipMarkingBuildUnstable>false</skipMarkingBuildUnstable>
-      <skipOldReports>false</skipOldReports>
-    </hudson.tasks.junit.JUnitResultArchiver>
-  </publishers>
+  <publishers/>
   <buildWrappers/>
 </project>
