@@ -9,6 +9,7 @@ controller:
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
+    - junit:1256.v002534a_5f33e
   JCasC:
     defaultConfig: true
     configScripts:
