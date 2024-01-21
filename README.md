@@ -16,3 +16,5 @@ Jenkins Credentials:
 #     runOnChoice("False")
 #   }
 # }
+
+kubectl cp ./jobs/fqltool.xml cassius-jenkins-0:/var/jenkins_home/jobs/fqltool-test/config.xml
