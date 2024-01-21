@@ -36,11 +36,14 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>.build/docker/_docker_run.sh bullseye-build.docker build-jars.sh 11
-.build/docker/run-tests.sh cqlsh-test 1</command>
+      <command>.build/docker/_docker_run.sh bullseye-build.docker build-jars.sh 11</command>
       <configuredLocalRules/>
     </hudson.tasks.Shell>
-  </builders>
+    <hudson.tasks.Shell>
+      <command>.build/docker/run-tests.sh cqlsh-test 1</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>  
   <publishers/>
   <buildWrappers/>
 </project>
