@@ -19,13 +19,13 @@ controller:
         security:
           scriptApproval:
             approvedScriptHashes:
-            - "SHA512:55f29722dd817bfc598511c670782828e34fc6d0261f5c018287b96b43fc8f55b2ad5861bb022060b6f3f96c2dba417346c9023fcb431f5e3fba80b62a5844bf"
+            - "SHA512:7b1b760734c77bc640b45de908f3570961bc1cbf073548f1cb25b89a6e2ccfe8ba4a7595b5568fac3efb48a5de06a14dffa105935f51fa89b66e10e72a33b18e"            
       dind: | 
         jenkins:
           clouds:
           - kubernetes:
-              containerCap: 10
-              containerCapStr: "10"
+              containerCap: 1
+              containerCapStr: "1"
               jenkinsTunnel: "cassius-jenkins-agent.default.svc.cluster.local:50000"
               jenkinsUrl: "http://cassius-jenkins.default.svc.cluster.local:8080"
               name: "kubernetes"
@@ -45,7 +45,8 @@ controller:
                 slaveConnectTimeout: '30'
                 yamlMergeStrategy: override
                 containers:
-                  - alwaysPullImage: true
+                  - name: jnlp
+                    alwaysPullImage: true
                     envVars:
                       - envVar:
                           key: DOCKER_TLS_CERTDIR
@@ -67,15 +68,15 @@ controller:
                       periodSeconds: '0'
                       successThreshold: '0'
                       timeoutSeconds: '0'
-                    name: jnlp
                     privileged: 'false'
-                    resourceLimitCpu: '1'
-                    resourceLimitMemory: 2Gi
-                    resourceRequestCpu: '1'
-                    resourceRequestMemory: 2Gi
+                    resourceRequestCpu: '2'
+                    resourceLimitCpu: '2'
+                    resourceRequestMemory: 8Gi
+                    resourceLimitMemory: 8Gi
                     ttyEnabled: 'false'
                     workingDir: /home/jenkins/agent
-                  - alwaysPullImage: 'false'
+                  - name: dind
+                    alwaysPullImage: 'false'
                     envVars:
                     - envVar:
                         key: DOCKER_TLS_CERTDIR
@@ -91,12 +92,11 @@ controller:
                       periodSeconds: '0'
                       successThreshold: '0'
                       timeoutSeconds: '0'
-                    name: dind
                     privileged: 'true'
-                    resourceLimitCpu: '1'
-                    resourceLimitMemory: 2Gi
-                    resourceRequestCpu: '1'
-                    resourceRequestMemory: 2Gi
+                    resourceRequestCpu: '2'
+                    resourceLimitCpu: '2'
+                    resourceRequestMemory: 8Gi
+                    resourceLimitMemory: 8Gi
                     ttyEnabled: 'false'
                     workingDir: /home/jenkins/agent
                 volumes:
@@ -112,18 +112,10 @@ controller:
       test-job: |
         jobs:
           - script: >
-              pipelineJob('default-agent') {
-                triggers {
-                  hudsonStartupTrigger {
-                    nodeParameterName("agent-dind")
-                    label("agent-dind")
-                    quietPeriod("0")
-                    runOnChoice("False")
-                  }
-                }
+              pipelineJob('fqltest') {
                 definition {
                   cps {
-                    script("node { sh 'echo hello world; docker run hello-world;' }")
+                    script("node { sh '.build/docker/_docker_run.sh bullseye-build.docker build-jars.sh 11 && .build/docker/run-tests.sh fqltool-test 1;' }")
                   }
                 }
               }
