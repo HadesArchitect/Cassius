@@ -10,6 +10,12 @@ controller:
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
     - junit:1256.v002534a_5f33e
+    - workflow-aggregator:596.v8c21c963d92d
+    - blueocean:1.27.10
+    - ws-cleanup:0.45
+    - pipeline-build-step:540.vb_e8849e1a_b_d8
+    - test-stability:2.3
+    - copyartifact:722.v0662a_9b_e22a_c
   JCasC:
     configScripts:
       welcome-message: |
@@ -19,14 +25,23 @@ controller:
         security:
           scriptApproval:
             approvedScriptHashes:
-            - "SHA512:7b1b760734c77bc640b45de908f3570961bc1cbf073548f1cb25b89a6e2ccfe8ba4a7595b5568fac3efb48a5de06a14dffa105935f51fa89b66e10e72a33b18e"
+            - "SHA512:d8dcd3a6630cc08a46ae45c76561d9844522d84fa72d260e5e95af538c7e11a7cb8bd5bcb662e19b23ec5b6cad705786cb79d245ded2c295eb1f84167f86a788"
       test-job: |
         jobs:
           - script: >
-              pipelineJob('fqltest') {
+              pipelineJob('dsl-cassius') {
                 definition {
-                  cps {
-                    script("node { sh '.build/docker/_docker_run.sh bullseye-build.docker build-jars.sh 11 && .build/docker/run-tests.sh fqltool-test 1;' }")
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/HadesArchitect/cassandra')
+                        }
+                        branch('*/aleks-cassius')
+                        scriptPath('.jenkins/Jenkinsfile')
+                      }
+                    }
+                    lightweight()
                   }
                 }
               }
@@ -47,9 +62,9 @@ agent:
   podTemplates:
     agent-dind: |
       - name: agent-dind
-        label: agent-dind
+        label: agent-dind cassandra
         activeDeadlineSeconds: '0'
-        idleMinutes: '1'
+        idleMinutes: '5'
         instanceCap: '30'
         nodeUsageMode: "NORMAL"
         showRawYaml: 'true'
@@ -72,7 +87,7 @@ agent:
                   key: DOCKER_HOST
                   value: tcp://localhost:2376
             # image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
-            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64
+            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64-procps
             livenessProbe:
               failureThreshold: '0'
               initialDelaySeconds: '0'
