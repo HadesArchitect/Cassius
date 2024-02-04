@@ -95,10 +95,10 @@ agent:
               successThreshold: '0'
               timeoutSeconds: '0'
             privileged: 'false'
-            resourceRequestCpu: '2'
-            resourceLimitCpu: '2'
-            resourceRequestMemory: 8Gi
-            resourceLimitMemory: 8Gi
+            resourceRequestCpu: '1'
+            resourceLimitCpu: '1'
+            resourceRequestMemory: 1Gi
+            resourceLimitMemory: 1Gi
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
           - name: dind
