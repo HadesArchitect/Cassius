@@ -62,7 +62,7 @@ agent:
   podTemplates:
     agent-dind: |
       - name: agent-dind
-        label: agent-dind cassandra
+        label: agent-dind cassandra cassandra-arm64
         activeDeadlineSeconds: '0'
         idleMinutes: '5'
         instanceCap: '30'
