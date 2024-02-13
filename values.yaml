@@ -1,3 +1,6 @@
+persistence:
+  enabled: false
+  size: "100Gi"
 controller:
   customJenkinsLabels:
     - controller
@@ -21,11 +24,6 @@ controller:
       welcome-message: |
         jenkins:
           systemMessage: Welcome to Cassius!
-      approve-test-script: |
-        security:
-          scriptApproval:
-            approvedScriptHashes:
-            - "SHA512:d8dcd3a6630cc08a46ae45c76561d9844522d84fa72d260e5e95af538c7e11a7cb8bd5bcb662e19b23ec5b6cad705786cb79d245ded2c295eb1f84167f86a788"
       test-job: |
         jobs:
           - script: >
