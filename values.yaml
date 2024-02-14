@@ -7,7 +7,7 @@ controller:
   installPlugins:
     - job-dsl:1.87
     - configuration-as-code:1763.vb_fe9c1b_83f7b
-    - kubernetes:4174.v4230d0ccd951
+    - kubernetes:4186.v1d804571d5d4
     - startup-trigger-plugin:2.9.4
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
@@ -130,7 +130,3 @@ agent:
           - emptyDirVolume:
               memory: 'false'
               mountPath: /certs
-        workspaceVolume:
-          dynamicPVC:
-            accessModes: "ReadWriteOnce"
-            requestsSize: "120Gi"
