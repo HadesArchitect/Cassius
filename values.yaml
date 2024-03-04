@@ -1,3 +1,4 @@
+# TODO allow staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods combinations java.util.Collection
 persistence:
   enabled: false
   size: "100Gi"
@@ -55,6 +56,12 @@ controller:
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
+    scritpApproval: |-
+      security:
+        scriptApproval:
+          approvedSignatures:
+          - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods combinations java.util.Collection"
+          - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object"
 agent:
   disableDefaultAgent: true
   podTemplates:
