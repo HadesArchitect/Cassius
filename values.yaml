@@ -21,7 +21,8 @@ controller:
     - copyartifact:722.v0662a_9b_e22a_c
   scriptApproval:
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods combinations java.util.Collection"
-    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object"    
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods putAt java.util.List java.util.List java.lang.Object"  
   JCasC:
     configScripts:
       welcome-message: |
