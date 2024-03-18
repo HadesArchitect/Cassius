@@ -1,9 +1,24 @@
+# https://github.com/jenkinsci/helm-charts/tree/main/charts/jenkins
 persistence:
   enabled: false
   size: "100Gi"
 controller:
+  ## To make Jenkins controller publicly available, uncomment serviceType and ingress.enabled
+  ## AND CHANGE PASSWORD (controller.jcasc.securityrealm.local.users.password)
+  ## To get URL run `kubectl describe svc cassius-jenkins | grep 'LoadBalancer Ingress'` and use port 8080
+  #serviceType: LoadBalancer
+  #ingress:
+  #  enabled: "true"
   customJenkinsLabels:
     - controller
+  resources:
+    requests:
+      cpu: 14000m
+      memory: 24576Mi
+    limits:
+      cpu: 15000m
+      memory: 24576Mi
+  javaOpts: -server -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -Xms12G -Xmx12G
   installPlugins:
     - job-dsl:1.87
     - configuration-as-code:1775.v810dc950b_514
@@ -19,6 +34,9 @@ controller:
     - pipeline-build-step:540.vb_e8849e1a_b_d8
     - test-stability:2.3
     - copyartifact:722.v0662a_9b_e22a_c
+# needs to be manually set on the first node ?? 
+  node-selector:
+    cassandra.jenkins: controller
   scriptApproval:
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods combinations java.util.Collection"
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object"
@@ -27,19 +45,19 @@ controller:
     configScripts:
       welcome-message: |
         jenkins:
-          systemMessage: Welcome to Cassius!
+          systemMessage: Welcome to Apache Cassandra
       test-job: |
         jobs:
           - script: >
-              pipelineJob('dsl-cassius') {
+              pipelineJob('cassandra') {
                 definition {
                   cpsScm {
                     scm {
                       git {
                         remote {
-                          url('https://github.com/HadesArchitect/cassandra')
+                          url('https://github.com/thelastpickle/cassandra')
                         }
-                        branch('*/aleks-cassius')
+                        branch('mck/18594/5.0')
                         scriptPath('.jenkins/Jenkinsfile')
                       }
                     }
@@ -55,25 +73,28 @@ controller:
         - id: "admin"
           name: "Jenkins Admin"
           password: "admin"
-#          password: "${chart-admin-password}"
+          #password: "${chart-admin-password}"
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
 agent:
   disableDefaultAgent: true
+  containerCap: 200
   podTemplates:
     agent-dind: |
       - name: agent-dind
         label: agent-dind cassandra cassandra-arm64
         activeDeadlineSeconds: '0'
-        idleMinutes: '5'
-        instanceCap: '30'
+        idleMinutes: '2'
+        instanceCap: 200
+        instanceCapStr: "200"
         nodeUsageMode: "NORMAL"
         showRawYaml: 'true'
         slaveConnectTimeout: '30'
         yamlMergeStrategy: override
         containers:
           - name: jnlp
+            # https://github.com/jenkinsci/kubernetes-plugin#pipeline-support
             alwaysPullImage: true
             envVars:
               - envVar:
@@ -89,7 +110,9 @@ agent:
                   key: DOCKER_HOST
                   value: tcp://localhost:2376
             # image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
-            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64-procps
+            # this needs to be from apache/
+            # and we want to implement harbour as an in-cluster docker registry cache :: https://medium.com/@elementtech.dev/kubernetes-image-proxy-cache-from-minutes-to-milliseconds-fd14173e831f
+            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64
             livenessProbe:
               failureThreshold: '0'
               initialDelaySeconds: '0'
@@ -99,8 +122,8 @@ agent:
             privileged: 'false'
             resourceRequestCpu: '1'
             resourceLimitCpu: '1'
-            resourceRequestMemory: 1Gi
-            resourceLimitMemory: 1Gi
+            resourceRequestMemory: 5Gi
+            resourceLimitMemory: 5Gi
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
           - name: dind
@@ -121,10 +144,10 @@ agent:
               successThreshold: '0'
               timeoutSeconds: '0'
             privileged: 'true'
-            resourceRequestCpu: '4'
-            resourceLimitCpu: '4'
-            resourceRequestMemory: 18Gi
-            resourceLimitMemory: 18Gi
+            resourceRequestCpu: '2'
+            resourceLimitCpu: '2'
+            resourceRequestMemory: 12Gi
+            resourceLimitMemory: 15Gi
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
         volumes:
