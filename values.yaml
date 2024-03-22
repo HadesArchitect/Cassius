@@ -33,7 +33,6 @@ controller:
     - pipeline-build-step:540.vb_e8849e1a_b_d8
     - test-stability:2.3
     - copyartifact:722.v0662a_9b_e22a_c
-# needs to be manually set on the first node ?? 
   node-selector:
     cassandra.jenkins: controller
   scriptApproval:
