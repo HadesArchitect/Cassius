@@ -3,6 +3,12 @@ persistence:
   enabled: false
   size: "100Gi"
 controller:
+  ## To make Jenkins controller publicly available, uncomment three following lines (serviceType and ingress.enabled)
+  ## AND CHANGE PASSWORD (controller.jcasc.securityrealm.local.users.password)
+  ## To get URL run `kubectl describe svc cassius-jenkins | grep 'LoadBalancer Ingress'` and use port 8080
+  #serviceType: LoadBalancer
+  #ingress:
+  #  enabled: "true"
   customJenkinsLabels:
     - controller
   resources:
