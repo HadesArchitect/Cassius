@@ -1,7 +1,7 @@
 ## Installation
 
 ```
-gcloud container clusters create cassius --machine-type n2-standard-4 --num-nodes 1 --node-labels=cassandra.jenkins=controller --zone us-central1-c
+gcloud container clusters create cassius --machine-type n2-standard-4 --num-nodes 1 --node-labels=cassandra.jenkins=controller --zone us-central1-c --autoscaling-profile optimize-utilization
 gcloud container node-pools create agents --cluster cassius --machine-type c2-standard-8 --enable-autoscaling --num-nodes=0 --min-nodes=0 --max-nodes=100 --node-labels=cassandra.jenkins=agent --zone us-central1-c
 helm repo add jenkins https://charts.jenkins.io
 helm repo update
