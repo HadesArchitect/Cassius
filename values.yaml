@@ -3,7 +3,7 @@ persistence:
   enabled: false
   size: "100Gi"
 controller:
-  ## To make Jenkins controller publicly available, uncomment three following lines (serviceType and ingress.enabled)
+  ## To make Jenkins controller publicly available, uncomment serviceType and ingress.enabled
   ## AND CHANGE PASSWORD (controller.jcasc.securityrealm.local.users.password)
   ## To get URL run `kubectl describe svc cassius-jenkins | grep 'LoadBalancer Ingress'` and use port 8080
   #serviceType: LoadBalancer
@@ -13,11 +13,12 @@ controller:
     - controller
   resources:
     requests:
-      cpu: 2000m
-      memory: 8192Mi
+      cpu: 14000m
+      memory: 24576Mi
     limits:
-      cpu: 4000m
-      memory: 12298Mi
+      cpu: 15000m
+      memory: 24576Mi
+  javaOpts: -server -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -Xms12G -Xmx12G
   installPlugins:
     - job-dsl:1.87
     - configuration-as-code:1775.v810dc950b_514
@@ -71,21 +72,21 @@ controller:
         - id: "admin"
           name: "Jenkins Admin"
           password: "admin"
-#          password: "${chart-admin-password}"
+          #password: "${chart-admin-password}"
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
 agent:
   disableDefaultAgent: true
-  containerCap: 1000
+  containerCap: 200
   podTemplates:
     agent-dind: |
       - name: agent-dind
         label: agent-dind cassandra cassandra-arm64
         activeDeadlineSeconds: '0'
-        idleMinutes: '3'
-        instanceCap: 1000
-        instanceCapStr: "1000"
+        idleMinutes: '2'
+        instanceCap: 200
+        instanceCapStr: "200"
         nodeUsageMode: "NORMAL"
         showRawYaml: 'true'
         slaveConnectTimeout: '30'
@@ -107,8 +108,9 @@ agent:
               - envVar:
                   key: DOCKER_HOST
                   value: tcp://localhost:2376
-            # image: <DOCKER_SLAVE_IMAGE>:latest  # FROM jenkins/inbound-agent, install dockeri cli
-            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64
+            # this needs to be from apache/
+            # and we want to implement harbour as an in-cluster docker registry cache :: https://medium.com/@elementtech.dev/kubernetes-image-proxy-cache-from-minutes-to-milliseconds-fd14173e831f
+            image: hadesarchitect/jenkins-inbound-agent-dind:linux-amd64 # see ./Dockerfile
             livenessProbe:
               failureThreshold: '0'
               initialDelaySeconds: '0'
