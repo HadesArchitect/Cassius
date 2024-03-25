@@ -23,7 +23,6 @@ controller:
     - job-dsl:1.87
     - configuration-as-code:1775.v810dc950b_514
     - kubernetes:4186.v1d804571d5d4
-    - startup-trigger-plugin:2.9.4
     - git
     - workflow-job:1385.vb_58b_86ea_fff1
     - workflow-cps
