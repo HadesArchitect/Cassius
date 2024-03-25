@@ -29,6 +29,8 @@ AND CHANGE PASSWORD (controller.jcasc.securityrealm.local.users.password)
 
 To get URL run `kubectl describe svc cassius-jenkins | grep 'LoadBalancer Ingress'` and use port 8080
 
+To enable public access after deploying the helm chart, execute upgrade to deliver changes: `helm upgrade -f values.yaml cassius jenkins/jenkins --wait`. Notice that deployment of a load balancer can take up to few minutes.
+
 Jenkins Credentials:
 - User `admin`
 - Password `admin`
