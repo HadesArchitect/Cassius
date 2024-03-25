@@ -15,7 +15,7 @@ There are two ways to access your jenkins installation, port-forwarding (simples
 ### Local-only Access
 
 ```
-helm upgrade --install -f values.yaml cassius jenkins/jenkins --wait
+kubectl port-forward svc/cassius-jenkins 8080:8080
 ```
 
 ### Public Access
