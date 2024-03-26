@@ -1,7 +1,7 @@
 # https://github.com/jenkinsci/helm-charts/tree/main/charts/jenkins
 persistence:
-  enabled: false
-  size: "100Gi"
+  enabled: true
+  size: "500Gi"
 controller:
   # To get URL run `kubectl describe svc cassius-jenkins | grep 'LoadBalancer Ingress'` and use port 8080
   serviceType: LoadBalancer
