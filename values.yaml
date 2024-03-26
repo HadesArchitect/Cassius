@@ -20,13 +20,13 @@ controller:
   installPlugins:
     - job-dsl:1.87
     - configuration-as-code:1775.v810dc950b_514
-    - kubernetes:4186.v1d804571d5d4
-    - git
-    - workflow-job:1385.vb_58b_86ea_fff1
+    - kubernetes:4203.v1dd44f5b_1cf9
+    - git:5.2.1
+    - workflow-job:1400.v7fd111b_ec82f
     - workflow-cps
-    - junit:1256.v002534a_5f33e
+    - junit:1259.v65ffcef24a_88
     - workflow-aggregator:596.v8c21c963d92d
-    - blueocean:1.27.10
+    - blueocean:1.27.11
     - ws-cleanup:0.45
     - pipeline-build-step:540.vb_e8849e1a_b_d8
     - test-stability:2.3
