@@ -13,10 +13,10 @@ controller:
   resources:
     requests:
       cpu: 4
-      memory: 12G
+      memory: 16G
     limits:
       cpu: 8
-      memory: 16G
+      memory: 20G
   javaOpts: -server -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -Xms8G -Xmx8G
   installPlugins:
     - job-dsl:1.87
@@ -33,7 +33,7 @@ controller:
     - test-stability:2.3
     - copyartifact:722.v0662a_9b_e22a_c
   node-selector:
-    cassandra.jenkins: controller
+    cassandra.jenkins.controller: true
   scriptApproval:
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods combinations java.util.Collection"
     - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods inspect java.lang.Object"
@@ -76,13 +76,14 @@ controller:
         allowAnonymousRead: false
 agent:
   disableDefaultAgent: true
-  containerCap: 200
+  containerCap: 300
   node-selector:
-    cassandra.jenkins: agent
+    cassandra.jenkins.agent: true
   podTemplates:
     agent-dind-small: |
       - name: agent-dind-small
         label: agent-dind cassandra-small cassandra-amd64-small
+        nodeSelector: 'cassandra.jenkins.agent.small=true'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 50
@@ -121,7 +122,7 @@ agent:
             resourceRequestCpu: 1
             resourceLimitCpu: 2
             resourceRequestMemory: 1G
-            resourceLimitMemory: 2G
+            resourceLimitMemory: 1G
             ttyEnabled: 'true'
             workingDir: /home/jenkins/agent
           - name: dind
@@ -145,7 +146,7 @@ agent:
             resourceRequestCpu: 2
             resourceLimitCpu: 4
             resourceRequestMemory: 1G
-            resourceLimitMemory: 1G
+            resourceLimitMemory: 2400M
             ttyEnabled: 'true'
             workingDir: /home/jenkins/agent
         volumes:
@@ -158,6 +159,7 @@ agent:
     agent-dind-medium: |
       - name: agent-dind-medium
         label: agent-dind cassandra-medium cassandra-amd64-medium
+        nodeSelector: 'cassandra.jenkins.agent.medium=true'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 140
@@ -197,7 +199,7 @@ agent:
             resourceRequestCpu: 1
             resourceLimitCpu: 3
             resourceRequestMemory: 1G
-            resourceLimitMemory: 2G
+            resourceLimitMemory: 1G
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
           - name: dind
@@ -220,8 +222,8 @@ agent:
             privileged: 'true'
             resourceRequestCpu: 2
             resourceLimitCpu: 4
-            resourceRequestMemory: 5G
-            resourceLimitMemory: 6G
+            resourceRequestMemory: 4800M
+            resourceLimitMemory: 5G
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
         volumes:
@@ -234,6 +236,7 @@ agent:
     agent-dind-large: |
       - name: agent-dind-large
         label: agent-dind cassandra-amd64-large
+        nodeSelector: 'cassandra.jenkins.agent.large=true'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 140
@@ -297,7 +300,7 @@ agent:
             resourceRequestCpu: 6
             resourceLimitCpu: 7
             resourceRequestMemory: 13G
-            resourceLimitMemory: 15G
+            resourceLimitMemory: 16G
             ttyEnabled: 'false'
             workingDir: /home/jenkins/agent
         volumes:
