@@ -16,7 +16,7 @@ controller:
     limits:
       cpu: 8
       memory: 16G
-  javaOpts: -server -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -Xms8G -Xmx8G
+  javaOpts: -server -XX:+AlwaysPreTouch -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=40 -Xms10G -Xmx10G
   installPlugins:
     - job-dsl:1.87
     - configuration-as-code:1775.v810dc950b_514
@@ -82,6 +82,7 @@ agent:
     agent-dind-small: |
       - name: agent-dind-small
         label: agent-dind cassandra-amd64-small
+        nodeSelector: 'cassandra.size=small'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 50
@@ -157,6 +158,7 @@ agent:
     agent-dind-medium: |
       - name: agent-dind-medium
         label: agent-dind cassandra-amd64-medium
+        nodeSelector: 'cassandra.size=medium'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 140
@@ -233,6 +235,7 @@ agent:
     agent-dind-large: |
       - name: agent-dind-large
         label: agent-dind cassandra-amd64-large
+        nodeSelector: 'cassandra.size=large'
         activeDeadlineSeconds: '0'
         idleMinutes: 1
         instanceCap: 140
