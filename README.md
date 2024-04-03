@@ -38,8 +38,7 @@ gcloud container node-pools create agents-large --cluster ${CLUSTER_NAME} --mach
 # auth (and make default context)
 gcloud container clusters get-credentials cassius --zone ${ZONE}
 
-helm repo add jenkins https://charts.jenkins.io
-helm repo update
+# Deploy jenkins
 helm upgrade --install -f values.yaml cassius jenkins/jenkins --wait
 
 # get the server's address
