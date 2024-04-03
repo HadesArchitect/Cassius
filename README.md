@@ -19,7 +19,7 @@ helm repo update
 
 ```
 # pick a cluster name that is identifiable to you
-CLUSTER_NAME="$(whoami)_cassandra-jenkins"
+CLUSTER_NAME="$(whoami)-cassandra-jenkins"
 # choose your closest (low-carbon) zone
 ZONE="us-central1-c"
 
