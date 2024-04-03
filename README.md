@@ -36,7 +36,7 @@ gcloud container node-pools create agents-medium --cluster ${CLUSTER_NAME} --mac
 gcloud container node-pools create agents-large --cluster ${CLUSTER_NAME} --machine-type n2-standard-8 --disk-type=pd-ssd --enable-autoscaling --spot --num-nodes=0 --min-nodes=0 --max-nodes=160 --node-labels=cassandra.jenkins.agent=true,cassandra.jenkins.agent.large=true --zone ${ZONE}
 
 # auth (and make default context)
-gcloud container clusters get-credentials cassius --zone ${ZONE}
+gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE}
 
 # Deploy jenkins
 helm upgrade --install -f values.yaml cassius jenkins/jenkins --wait
